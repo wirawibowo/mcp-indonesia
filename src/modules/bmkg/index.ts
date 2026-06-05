@@ -55,14 +55,16 @@ export function register(server: McpServer): void {
     "bmkg_weather_forecast",
     {
       description:
-        "Prakiraan cuaca 3 harian per desa/kelurahan dari BMKG. Memerlukan kode adm4 (format Kemendagri, mis. '31.74.04.1003' atau '3174041003'). Kode adm4 bisa dicari di data.bmkg.go.id.",
+        "Prakiraan cuaca 3 harian per desa/kelurahan dari BMKG. Bisa diisi kode adm4 (mis. '3174041003' atau '31.74.04.1003') ATAU nama desa/kelurahan (mis. 'Menteng', 'Cibadak'). Jika nama desa tidak unik, hasil pertama yang cocok digunakan.",
       inputSchema: {
-        adm4: z.string().describe("Kode wilayah adm4 (10 digit / bertitik PP.RR.SS.VVVV)."),
+        query: z
+          .string()
+          .describe("Kode adm4 (10 digit / format PP.RR.SS.VVVV) atau nama desa/kelurahan."),
       },
     },
-    async ({ adm4 }) => {
+    async ({ query }) => {
       try {
-        return jsonResult(await getWeatherForecast(adm4), BMKG_ATTRIBUTION);
+        return jsonResult(await getWeatherForecast(query), BMKG_ATTRIBUTION);
       } catch (err) {
         return toError(err);
       }

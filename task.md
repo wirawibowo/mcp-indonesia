@@ -8,7 +8,7 @@ Status: `[ ]` belum · `[~]` proses · `[x]` selesai
 - [x] T0.3 Config build (`tsup`) & test (`vitest`)
 - [x] T0.4 `.gitignore`
 - [x] T0.5 Install deps (`npm install`)
-- [ ] T0.6 `git init` + commit awal
+- [x] T0.6 `git init` + commit awal
 
 ## Fase 1 — Core
 - [x] T1.1 `core/types.ts` — helper respons MCP (`textResult`/`jsonResult`/`errorResult`)
@@ -44,7 +44,7 @@ Status: `[ ]` belum · `[~]` proses · `[x]` selesai
 - [x] T6.2 Smoke test stdio (`scripts/smoke.mjs`) — 12 tools OK
 - [x] T6.3 `README.md` (instalasi, config, atribusi, kontribusi, roadmap)
 - [x] T6.4 Integration test in-memory (8 test) + coverage 96% (≥80% ✔)
-- [ ] T6.5 Commit rilis
+- [x] T6.5 Commit rilis + push ke github.com/wirawibowo/mcp-indonesia
 
 ## Ringkasan
 - **12 tools** aktif · **49 test** lulus · coverage **96.47%**.

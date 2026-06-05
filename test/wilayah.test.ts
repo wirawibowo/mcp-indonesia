@@ -11,12 +11,15 @@ import {
 describe("wilayah repository", () => {
   beforeEach(() => _resetCache());
 
-  it("memuat daftar provinsi (>= 34)", () => {
+  it("memuat daftar 38 provinsi termasuk Papua DOB 2022", () => {
     const provinces = listProvinces();
-    expect(provinces.length).toBeGreaterThanOrEqual(34);
-    // Jawa Barat berkode 32.
-    const jabar = provinces.find((p) => p.code === "32");
-    expect(jabar?.name).toContain("JAWA BARAT");
+    expect(provinces.length).toBe(38);
+    expect(provinces.find((p) => p.code === "32")?.name).toContain("JAWA BARAT");
+    // 4 provinsi Papua baru
+    expect(provinces.find((p) => p.code === "92")?.name).toContain("PAPUA BARAT DAYA");
+    expect(provinces.find((p) => p.code === "95")?.name).toContain("PAPUA SELATAN");
+    expect(provinces.find((p) => p.code === "96")?.name).toContain("PAPUA TENGAH");
+    expect(provinces.find((p) => p.code === "97")?.name).toContain("PAPUA PEGUNUNGAN");
   });
 
   it("listChildren mengembalikan kab/kota dari kode provinsi", () => {

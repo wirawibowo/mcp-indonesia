@@ -25,15 +25,16 @@ describe("MCP server (integration)", () => {
     vi.restoreAllMocks();
   });
 
-  it("mendaftarkan 12 tools dari semua modul", async () => {
+  it("mendaftarkan 13 tools dari semua modul", async () => {
     const client = await connectedClient();
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(12);
+    expect(tools).toHaveLength(13);
     const names = tools.map((t) => t.name);
     expect(names).toContain("wilayah_list_provinces");
     expect(names).toContain("validate_nik");
     expect(names).toContain("bmkg_latest_earthquake");
     expect(names).toContain("finance_exchange_rate");
+    expect(names).toContain("finance_idx_quote");
     await client.close();
   });
 
@@ -97,16 +98,16 @@ describe("MCP server (integration)", () => {
     await client.close();
   });
 
-  it("weather memanggil endpoint dan mengembalikan data", async () => {
+  it("weather memanggil endpoint dengan kode adm4", async () => {
     globalThis.fetch = vi.fn(async () => ({
       ok: true,
       status: 200,
       json: async () => ({ lokasi: { desa: "Test" }, data: [] }),
     })) as unknown as typeof fetch;
     const client = await connectedClient();
-    const res = await client.callTool({ name: "bmkg_weather_forecast", arguments: { adm4: "3174041003" } });
+    const res = await client.callTool({ name: "bmkg_weather_forecast", arguments: { query: "3174041003" } });
     const parsed = JSON.parse((res.content as Array<{ text: string }>)[0]!.text);
-    expect(parsed.data.lokasi.desa).toBe("Test");
+    expect(parsed.data.forecast.lokasi.desa).toBe("Test");
     await client.close();
   });
 });

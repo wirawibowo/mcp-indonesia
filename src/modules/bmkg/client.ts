@@ -73,11 +73,45 @@ export interface WeatherForecast {
   data: Array<{ cuaca: unknown[][] }>;
 }
 
-export async function getWeatherForecast(adm4: string): Promise<WeatherForecast> {
-  const code = normalizeAdm4(adm4);
-  return cache.getOrLoad(`weather:${code}`, TTL.TEN_MINUTES, () =>
-    fetchJson<WeatherForecast>(`${WEATHER_BASE}?adm4=${encodeURIComponent(code)}`),
+export interface WeatherForecastResult {
+  adm4: string;
+  resolvedFrom?: { code: string; name: string; level: string };
+  forecast: WeatherForecast;
+}
+
+/**
+ * Ambil prakiraan cuaca untuk kode adm4 atau nama desa/kelurahan.
+ * Jika `input` berupa nama (bukan digit), cari desa via wilayah repository,
+ * ambil yang pertama cocok. Kode 10-digit (mis. "3174041003") juga diterima.
+ */
+export async function getWeatherForecast(input: string): Promise<WeatherForecastResult> {
+  // Cek apakah input berupa kode (digit/titik) atau nama
+  const looksLikeCode = /^[\d.]+$/.test(input.trim());
+
+  if (looksLikeCode) {
+    const adm4 = normalizeAdm4(input);
+    const forecast = await cache.getOrLoad(`weather:${adm4}`, TTL.TEN_MINUTES, () =>
+      fetchJson<WeatherForecast>(`${WEATHER_BASE}?adm4=${encodeURIComponent(adm4)}`),
+    );
+    return { adm4, forecast };
+  }
+
+  // Resolve nama → kode wilayah → adm4
+  const { search } = await import("../wilayah/repository.js");
+  const results = search(input, 10);
+  const village = results.find((r) => r.level === "village") ?? results[0];
+  if (!village) {
+    throw new Error(`Desa/kelurahan '${input}' tidak ditemukan dalam dataset wilayah.`);
+  }
+  const adm4 = normalizeAdm4(village.code);
+  const forecast = await cache.getOrLoad(`weather:${adm4}`, TTL.TEN_MINUTES, () =>
+    fetchJson<WeatherForecast>(`${WEATHER_BASE}?adm4=${encodeURIComponent(adm4)}`),
   );
+  return {
+    adm4,
+    resolvedFrom: { code: village.code, name: village.name, level: village.level },
+    forecast,
+  };
 }
 
 /** Reset cache — hanya untuk testing. */

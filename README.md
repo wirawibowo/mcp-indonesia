@@ -5,6 +5,7 @@
 <img src="https://img.shields.io/badge/MCP-Open%20Standard-6366f1?style=for-the-badge&logo=anthropic&logoColor=white" />
 <img src="https://img.shields.io/badge/TypeScript-5.6-3178c6?style=for-the-badge&logo=typescript&logoColor=white" />
 <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+<img src="https://img.shields.io/badge/Tools-13-22c55e?style=for-the-badge" />
 <img src="https://img.shields.io/badge/Coverage-96%25-22c55e?style=for-the-badge" />
 <img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge" />
 
@@ -73,7 +74,7 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 |------|-----------|
 | `bmkg_latest_earthquake` | Info gempa terkini |
 | `bmkg_recent_earthquakes` | 15 gempa terakhir (`terkini` / `dirasakan`) |
-| `bmkg_weather_forecast` | Prakiraan cuaca 3 harian per desa (kode adm4) |
+| `bmkg_weather_forecast` | Prakiraan cuaca 3 harian — masukkan **kode adm4 atau nama desa** |
 
 ### 🪪 Validator — *offline, pure logic*
 | Tool | Deskripsi |
@@ -81,10 +82,11 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 | `validate_nik` | Validasi & dekode NIK 16 digit (provinsi, kab/kota, tgl lahir, gender) |
 | `validate_npwp` | Validasi & dekode NPWP 15/16 digit |
 
-### 💱 Keuangan — *online, cache 6 jam*
-| Tool | Deskripsi |
-|------|-----------|
-| `finance_exchange_rate` | Kurs mata uang termasuk IDR (referensi pasar) |
+### 💱 Keuangan — *online, cache*
+| Tool | Cache | Deskripsi |
+|------|-------|-----------|
+| `finance_exchange_rate` | 6 jam | Kurs mata uang termasuk IDR (referensi pasar) |
+| `finance_idx_quote` | 1 menit | Harga saham IDX via Yahoo Finance (tidak resmi, delay ~15 mnt) |
 
 ---
 
@@ -286,7 +288,7 @@ node scripts/smoke.mjs # Smoke test stdio end-to-end (perlu build dulu)
 
 > **Kurs** — bersumber dari ExchangeRate-API (referensi pasar), **bukan** kurs resmi JISDOR Bank Indonesia.
 
-> **`bmkg_weather_forecast`** — memerlukan kode **adm4** format Kemendagri (mis. `31.74.04.1003`). Skema ini berbeda dari dataset wilayah emsifa. Cari adm4 di [data.bmkg.go.id](https://data.bmkg.go.id).
+> **`bmkg_weather_forecast`** — bisa diisi kode adm4 (mis. `3174041003`) **atau nama desa/kelurahan** (mis. `"Menteng"`). Jika nama tidak unik, hasil pertama yang cocok digunakan — sertakan nama kecamatan/kota untuk hasil lebih spesifik.
 
 ---
 
@@ -329,10 +331,9 @@ src/
 
 ## 🗺️ Roadmap
 
-- [ ] `finance_idx_quote` — harga saham IDX (menunggu sumber API andal)
-- [ ] `ojk_check_investment` — cek entitas investasi ilegal OJK
-- [ ] Pemetaan kode adm4 BMKG ↔ dataset wilayah (resolusi cuaca by nama desa)
-- [ ] Data wilayah 38 provinsi pasca-pemekaran Papua
+- [ ] `ojk_check_investment` — cek entitas investasi ilegal OJK (bundled snapshot Satgas PASTI)
+- [ ] `finance_bi_jisdor` — kurs JISDOR Bank Indonesia (menunggu endpoint resmi stabil)
+- [ ] Data kecamatan & desa untuk provinsi Papua DOB 2022 (92/95/96/97)
 
 ---
 
