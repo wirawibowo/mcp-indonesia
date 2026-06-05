@@ -4,7 +4,14 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { jsonResult, errorResult } from "../../core/types.js";
-import { getExchangeRate, FX_ATTRIBUTION, getIdxQuote, IDX_ATTRIBUTION } from "./client.js";
+import {
+  getExchangeRate,
+  FX_ATTRIBUTION,
+  getIdxQuote,
+  IDX_ATTRIBUTION,
+  getJisdor,
+  JISDOR_ATTRIBUTION,
+} from "./client.js";
 
 export function register(server: McpServer): void {
   server.registerTool(
@@ -43,6 +50,29 @@ export function register(server: McpServer): void {
         return jsonResult(await getIdxQuote(ticker), IDX_ATTRIBUTION);
       } catch (err) {
         return errorResult(err instanceof Error ? err.message : "Gagal mengambil data saham.");
+      }
+    },
+  );
+
+  server.registerTool(
+    "finance_bi_jisdor",
+    {
+      description:
+        "Kurs JISDOR (Jakarta Interbank Spot Dollar Rate) RESMI dari Bank Indonesia — sumber otoritatif untuk USD/IDR. Endpoint BI bisa tidak responsif; gunakan `finance_exchange_rate` sebagai fallback referensi pasar.",
+      inputSchema: {
+        currency: z.string().length(3).optional().describe("Kode mata uang ISO-4217 (default: USD)."),
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional()
+          .describe("Tanggal acuan YYYY-MM-DD (default: hari ini). Bila jatuh di akhir pekan, dipakai hari kerja terdekat."),
+      },
+    },
+    async ({ currency, date }) => {
+      try {
+        return jsonResult(await getJisdor(currency ?? "USD", date), JISDOR_ATTRIBUTION);
+      } catch (err) {
+        return errorResult(err instanceof Error ? err.message : "Gagal mengambil JISDOR.");
       }
     },
   );

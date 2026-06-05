@@ -1,7 +1,7 @@
 {
   "name": "mcp-indonesia",
-  "version": "0.1.0",
-  "description": "MCP server untuk data publik Indonesia: wilayah administratif, BMKG (cuaca/gempa), keuangan (kurs BI), dan validator NIK/NPWP.",
+  "version": "0.2.0",
+  "description": "MCP server untuk data publik Indonesia: wilayah, kodepos, BMKG, kurs (JISDOR resmi BI), saham IDX, NIK/NPWP/HP, bank, jadwal sholat & arah kiblat, hari libur, cek entitas OJK Waspada Investasi.",
   "type": "module",
   "bin": {
     "mcp-indonesia": "dist/index.js"
@@ -27,6 +27,12 @@
     "bmkg",
     "nik",
     "npwp",
+    "kodepos",
+    "jisdor",
+    "bank",
+    "prayer-times",
+    "qibla",
+    "ojk",
     "ai-agent"
   ],
   "license": "MIT",
@@ -35,6 +41,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
+    "adhan": "^4.4.3",
+    "fast-xml-parser": "^5.8.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
