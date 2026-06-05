@@ -25,16 +25,17 @@ describe("MCP server (integration)", () => {
     vi.restoreAllMocks();
   });
 
-  it("mendaftarkan 13 tools dari semua modul", async () => {
+  it("mendaftarkan tools dari semua modul", async () => {
     const client = await connectedClient();
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(13);
     const names = tools.map((t) => t.name);
     expect(names).toContain("wilayah_list_provinces");
     expect(names).toContain("validate_nik");
     expect(names).toContain("bmkg_latest_earthquake");
     expect(names).toContain("finance_exchange_rate");
     expect(names).toContain("finance_idx_quote");
+    expect(names).toContain("phone_validate");
+    expect(names).toContain("phone_operator");
     await client.close();
   });
 

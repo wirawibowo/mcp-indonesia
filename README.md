@@ -5,19 +5,20 @@
 <img src="https://img.shields.io/badge/MCP-Open%20Standard-6366f1?style=for-the-badge&logo=anthropic&logoColor=white" />
 <img src="https://img.shields.io/badge/TypeScript-5.6-3178c6?style=for-the-badge&logo=typescript&logoColor=white" />
 <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-<img src="https://img.shields.io/badge/Tools-13-22c55e?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Coverage-96%25-22c55e?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Tools-26-22c55e?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Tests-139%20passing-22c55e?style=for-the-badge" />
 <img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge" />
 
 <br/>
 
 **MCP Server untuk data publik Indonesia.**  
-Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cuaca & gempa BMKG, kurs mata uang, serta validasi & dekode NIK/NPWP — semua dari satu server.
+Beri AI agent akses langsung ke data wilayah, BMKG, kurs (termasuk JISDOR resmi), validasi NIK/NPWP/HP, kode pos, hari libur, jadwal sholat & arah kiblat, daftar bank, serta cek entitas OJK & Satgas PASTI — semua dari satu server.
 
 <br/>
 
 ```
-🏙️ Wilayah   ·   🌤️ BMKG   ·   💱 Kurs   ·   🪪 NIK/NPWP
+🏙️ Wilayah · 📮 Kodepos · 🌤️ BMKG · 💱 Kurs+JISDOR · 🪪 NIK/NPWP/HP
+🏦 Bank · 🕌 Sholat · 📅 Libur · ⚠️ OJK Waspada
 ```
 
 </div>
@@ -57,7 +58,7 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 
 ---
 
-## 🛠️ Tools (12 tools aktif)
+## 🛠️ Tools (26 tools aktif)
 
 ### 🏙️ Wilayah Administratif — *offline, instan*
 | Tool | Deskripsi |
@@ -68,6 +69,12 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 | `wilayah_list_villages` | Desa/kelurahan dalam kecamatan |
 | `wilayah_search` | Cari nama wilayah lintas level |
 | `wilayah_detail` | Hierarki lengkap dari sebuah kode wilayah |
+
+### 📮 Kodepos — *offline, 83.762 entries*
+| Tool | Deskripsi |
+|------|-----------|
+| `kodepos_get` | Kode pos dari kode wilayah adm4 (10 digit) |
+| `kodepos_search` | Reverse: kode pos → daftar desa/kelurahan |
 
 ### 🌤️ BMKG — *online, cache otomatis*
 | Tool | Deskripsi |
@@ -81,12 +88,40 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 |------|-----------|
 | `validate_nik` | Validasi & dekode NIK 16 digit (provinsi, kab/kota, tgl lahir, gender) |
 | `validate_npwp` | Validasi & dekode NPWP 15/16 digit |
+| `phone_validate` | Validasi format nomor HP Indonesia (08xx / +628xx) |
+| `phone_operator` | Deteksi operator dari prefix (Telkomsel, XL/Axis, Indosat, Tri, Smartfren) |
 
 ### 💱 Keuangan — *online, cache*
 | Tool | Cache | Deskripsi |
 |------|-------|-----------|
 | `finance_exchange_rate` | 6 jam | Kurs mata uang termasuk IDR (referensi pasar) |
 | `finance_idx_quote` | 1 menit | Harga saham IDX via Yahoo Finance (tidak resmi, delay ~15 mnt) |
+| `finance_bi_jisdor` | 6 jam | **JISDOR resmi Bank Indonesia** (USD/IDR + valas lain) |
+
+### 🏦 Bank — *offline, 40+ bank*
+| Tool | Deskripsi |
+|------|-----------|
+| `bank_list` | Daftar bank Indonesia (filter: umum/syariah/asing/pembangunan) |
+| `bank_get` | Detail bank by kode kliring (3 digit) atau SWIFT/BIC |
+| `bank_search` | Cari bank by nama/alias |
+
+### 🕌 Prayer — *offline, pure astronomical calc*
+| Tool | Deskripsi |
+|------|-----------|
+| `prayer_times` | Jadwal sholat (Subuh, Dhuhr, Ashar, Maghrib, Isya) — kota Indonesia atau lat/lon |
+| `prayer_qibla` | Arah kiblat dalam derajat (+ cardinal direction) |
+
+### 📅 Holiday — *offline, multi-tahun*
+| Tool | Deskripsi |
+|------|-----------|
+| `holiday_check` | Cek apakah tanggal tertentu libur nasional / cuti bersama |
+| `holiday_list` | Daftar libur dalam setahun (filter tipe) |
+| `holiday_next` | Hari libur berikutnya dari tanggal tertentu |
+
+### ⚠️ OJK Waspada Investasi — *offline snapshot*
+| Tool | Deskripsi |
+|------|-----------|
+| `ojk_check_entity` | Cek entitas: terdaftar OJK / masuk daftar ilegal Satgas PASTI |
 
 ---
 
@@ -272,8 +307,8 @@ await client.close();
 
 ```bash
 npm run dev            # Jalankan via tsx (tanpa build)
-npm test               # Unit + integration test (49 test)
-npm run test:coverage  # Laporan coverage (96%, target ≥80%)
+npm test               # Unit + integration test (139 test)
+npm run test:coverage  # Laporan coverage (91%+, target ≥80%)
 npm run typecheck      # Cek tipe TypeScript
 node scripts/smoke.mjs # Smoke test stdio end-to-end (perlu build dulu)
 ```
@@ -298,7 +333,12 @@ node scripts/smoke.mjs # Smoke test stdio end-to-end (perlu build dulu)
 |--------|------------|
 | [emsifa/api-wilayah-indonesia](https://github.com/emsifa/api-wilayah-indonesia) | Dataset wilayah administratif |
 | [BMKG](https://www.bmkg.go.id) | Data cuaca & gempa — **pencantuman sumber wajib** sesuai ketentuan BMKG |
-| [ExchangeRate-API](https://www.exchangerate-api.com) | Data kurs mata uang |
+| [ExchangeRate-API](https://www.exchangerate-api.com) | Data kurs mata uang (referensi pasar) |
+| [Bank Indonesia JISDOR](https://www.bi.go.id) | Kurs JISDOR resmi BI |
+| [cahyadsn/wilayah_kodepos](https://github.com/cahyadsn/wilayah_kodepos) | Kode pos per desa/kelurahan (Kepmendagri 2025) |
+| [guangrei/APIHariLibur_V2](https://github.com/guangrei/APIHariLibur_V2) | Hari libur nasional & cuti bersama (SKB 3 Menteri) |
+| [adhan-js](https://github.com/batoulapps/adhan-js) | Kalkulasi jadwal sholat & arah kiblat |
+| [Namchee/ojk-invest-api](https://github.com/Namchee/ojk-invest-api) | Mirror data OJK Waspada Investasi (Satgas PASTI) |
 
 ---
 
@@ -313,10 +353,16 @@ src/
 │   └── cache.ts          ← TTL Cache in-memory
 └── modules/
     ├── registry.ts       ← Daftar modul aktif (satu-satunya titik perakitan)
-    ├── wilayah/          ← Offline, dataset di-bundle (CSV → TypeScript)
-    ├── validator/        ← Offline, pure logic
+    ├── wilayah/          ← Offline, dataset di-bundle
+    ├── validator/        ← Offline, pure logic (NIK/NPWP)
+    ├── phone/            ← Offline, deteksi operator dari prefix
+    ├── bank/             ← Offline, 40+ bank (kliring + SWIFT)
+    ├── kodepos/          ← Offline, 83.762 kode pos (Kepmendagri 2025)
+    ├── holiday/          ← Offline, hari libur 2025-2027 (SKB 3 Menteri)
+    ├── prayer/           ← Offline, pure astronomical calc (adhan-js)
+    ├── ojk/              ← Offline snapshot, Satgas PASTI 2.189+11.278 entitas
     ├── bmkg/             ← Online + cache + atribusi BMKG wajib
-    └── finance/          ← Online + cache 6 jam
+    └── finance/          ← Online + cache 6 jam (kurs pasar + JISDOR resmi BI)
 ```
 
 **Menambah modul baru:**
@@ -331,9 +377,9 @@ src/
 
 ## 🗺️ Roadmap
 
-- [ ] `ojk_check_investment` — cek entitas investasi ilegal OJK (bundled snapshot Satgas PASTI)
-- [ ] `finance_bi_jisdor` — kurs JISDOR Bank Indonesia (menunggu endpoint resmi stabil)
 - [ ] Data kecamatan & desa untuk provinsi Papua DOB 2022 (92/95/96/97)
+- [ ] `holiday_refresh` — script auto-update holiday data untuk tahun mendatang
+- [ ] `bank_refresh` — script periodic untuk sinkronisasi daftar bank dari BI
 
 ---
 

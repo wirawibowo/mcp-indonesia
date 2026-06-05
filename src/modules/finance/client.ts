@@ -135,6 +135,124 @@ export async function getIdxQuote(ticker: string): Promise<IdxQuoteResult> {
   });
 }
 
+// ── BI JISDOR (Kurs Resmi Bank Indonesia) ───────────────────────────────────
+
+export const JISDOR_ATTRIBUTION = {
+  source: "Bank Indonesia — JISDOR (Jakarta Interbank Spot Dollar Rate)",
+  url: "https://www.bi.go.id/id/statistik/informasi-kurs/jisdor/default.aspx",
+} as const;
+
+const JISDOR_ENDPOINT = "https://www.bi.go.id/biwebservice/wskursbi.asmx/getSubKursLokal3";
+
+export interface JisdorResult {
+  currency: string;
+  date: string;
+  /** Kurs Beli BI. */
+  buyRate: number;
+  /** Kurs Jual BI. */
+  sellRate: number;
+  /** Midpoint (rerata buy+sell). */
+  midRate: number;
+}
+
+interface SubKursItem {
+  mts_kd?: string | string[];
+  kurs_jual?: string | string[];
+  kurs_beli?: string | string[];
+  tgl_subkurslokal?: string | string[];
+}
+
+function toIsoDate(d: Date): string {
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Ambil kurs JISDOR resmi BI untuk `currency` (default USD).
+ * Endpoint BI cukup sering tidak responsif — error message mengarahkan ke laman BI.
+ * Cache 6 jam (JISDOR dipublish pukul 15:15 WIB tiap hari kerja).
+ */
+export async function getJisdor(currency = "USD", date?: string): Promise<JisdorResult> {
+  const code = currency.toUpperCase();
+  const end = date ? new Date(`${date}T00:00:00Z`) : new Date();
+  const start = new Date(end.getTime() - 6 * 24 * 3600 * 1000);
+  const startStr = toIsoDate(start);
+  const endStr = toIsoDate(end);
+  const cacheKey = `jisdor:${code}:${startStr}:${endStr}`;
+
+  return cache.getOrLoad(cacheKey, TTL.SIX_HOURS, async () => {
+    const url = `${JISDOR_ENDPOINT}?mts=${encodeURIComponent(code)}&startdate=${startStr}&enddate=${endStr}`;
+    const { XMLParser } = await import("fast-xml-parser");
+    let xml: string;
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(10_000),
+        headers: { Accept: "application/xml,text/xml,*/*" },
+      });
+      if (!res.ok) {
+        throw new Error(`BI endpoint mengembalikan HTTP ${res.status}.`);
+      }
+      xml = await res.text();
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `Endpoint BI JISDOR tidak dapat diakses (${reason}). Cek manual: https://www.bi.go.id/id/statistik/informasi-kurs/jisdor/default.aspx`,
+      );
+    }
+
+    const parser = new XMLParser({ ignoreAttributes: true });
+    const parsed = parser.parse(xml) as Record<string, unknown>;
+    const records = extractRecords(parsed);
+    if (records.length === 0) {
+      throw new Error(
+        `Tidak ada data JISDOR untuk '${code}' pada rentang ${startStr}..${endStr}. Coba tanggal hari kerja sebelumnya.`,
+      );
+    }
+    records.sort((a, b) => b.date.localeCompare(a.date));
+    return records[0]!;
+  });
+}
+
+function extractRecords(parsed: Record<string, unknown>): JisdorResult[] {
+  const result: JisdorResult[] = [];
+  const stack: unknown[] = [parsed];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node || typeof node !== "object") continue;
+    const rec = node as Record<string, unknown>;
+    const subkurs = rec.mt_kurs_lokal_subkursLokal3;
+    if (subkurs) {
+      const items = Array.isArray(subkurs) ? subkurs : [subkurs];
+      for (const raw of items) {
+        const it = raw as SubKursItem;
+        const date = String(getFirst(it.tgl_subkurslokal) ?? "").slice(0, 10);
+        const sell = Number(getFirst(it.kurs_jual) ?? NaN);
+        const buy = Number(getFirst(it.kurs_beli) ?? NaN);
+        const code = String(getFirst(it.mts_kd) ?? "").trim();
+        if (!date || Number.isNaN(sell) || Number.isNaN(buy)) continue;
+        result.push({
+          currency: code,
+          date,
+          buyRate: buy,
+          sellRate: sell,
+          midRate: (buy + sell) / 2,
+        });
+      }
+    }
+    for (const v of Object.values(node)) {
+      if (v && typeof v === "object") stack.push(v);
+    }
+  }
+  return result;
+}
+
+function getFirst<T>(v: T | T[] | undefined): T | undefined {
+  if (Array.isArray(v)) return v[0];
+  return v;
+}
+
 /** Reset cache — hanya untuk testing. */
 export function _resetCache(): void {
   cache.clear();
