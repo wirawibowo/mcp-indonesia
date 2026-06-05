@@ -23,14 +23,14 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 
 ---
 
-## 🌐 Kompatibilitas — Tidak Hanya Claude!
+## 🌐 Kompatibilitas — Semua MCP Client
 
-> **MCP adalah open standard.** `mcp-indonesia` bekerja di semua aplikasi yang support MCP client — bukan cuma Claude.
+> **MCP adalah open standard.** `mcp-indonesia` bekerja di semua aplikasi yang support MCP client.
 
 | Client | Platform | Status |
 |--------|----------|:------:|
-| **Claude Desktop** | Desktop app | ✅ |
-| **Claude.ai** | Web | ✅ |
+| **Anthropic Desktop** | Desktop app | ✅ |
+| **Anthropic Web** | Web | ✅ |
 | **Cursor** | IDE | ✅ |
 | **VS Code** (GitHub Copilot) | IDE | ✅ |
 | **Windsurf** | IDE | ✅ |
@@ -48,7 +48,7 @@ Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cu
 
 | | |
 |---|---|
-| 🔌 **Universal** | Jalan di semua MCP client, bukan cuma Claude |
+| 🔌 **Universal** | Jalan di semua MCP client |
 | 📦 **Offline-first** | Data wilayah & validator bekerja tanpa internet |
 | ⚡ **TTL Cache** | Hit API publik (BMKG, kurs) seminimal mungkin |
 | 🧩 **Modular** | Tambah data source baru = buat 1 modul + 1 baris registrasi |
@@ -101,9 +101,9 @@ npm run build
 
 ## ⚙️ Konfigurasi per Client
 
-### Claude Desktop
+### Anthropic Desktop App
 
-Edit `claude_desktop_config.json`:
+Edit file config MCP (`mcp_config.json` atau sesuai nama di app yang kamu pakai):
 
 ```json
 {
@@ -116,9 +116,7 @@ Edit `claude_desktop_config.json`:
 }
 ```
 
-> 📁 Lokasi config: `~/Library/Application Support/Claude/` (macOS) · `%APPDATA%\Claude\` (Windows)
-
-Restart Claude Desktop, lalu coba:
+Restart app, lalu coba:
 > 💬 _"Cari kode wilayah Cibadak"_ · _"Validasi NIK 3273011708950001"_ · _"Gempa terkini di Indonesia"_
 
 ---
@@ -194,7 +192,7 @@ Buka **Cline Settings → MCP Servers → Edit Config**, tambahkan:
 
 ## 🖥️ Penggunaan Mandiri (Tanpa AI Client)
 
-Tidak punya Claude Desktop atau IDE dengan MCP? Bisa dipakai langsung dengan 3 cara:
+Tidak punya AI client dengan MCP? Bisa dipakai langsung dengan 3 cara:
 
 ### 1. 🔍 MCP Inspector (GUI interaktif — paling mudah)
 
