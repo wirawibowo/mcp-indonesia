@@ -2,7 +2,7 @@
 
 # 🇮🇩 mcp-indonesia
 
-<img src="https://img.shields.io/badge/MCP-Model%20Context%20Protocol-6366f1?style=for-the-badge&logo=anthropic&logoColor=white" />
+<img src="https://img.shields.io/badge/MCP-Open%20Standard-6366f1?style=for-the-badge&logo=anthropic&logoColor=white" />
 <img src="https://img.shields.io/badge/TypeScript-5.6-3178c6?style=for-the-badge&logo=typescript&logoColor=white" />
 <img src="https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
 <img src="https://img.shields.io/badge/Coverage-96%25-22c55e?style=for-the-badge" />
@@ -11,7 +11,7 @@
 <br/>
 
 **MCP Server untuk data publik Indonesia.**  
-Beri AI agent (Claude Desktop, IDE, dll) kemampuan langsung untuk query data wilayah administratif, info cuaca & gempa BMKG, kurs mata uang, serta validasi & dekode NIK/NPWP — semua dari satu server.
+Beri AI agent kemampuan langsung untuk query data wilayah administratif, info cuaca & gempa BMKG, kurs mata uang, serta validasi & dekode NIK/NPWP — semua dari satu server.
 
 <br/>
 
@@ -23,11 +23,32 @@ Beri AI agent (Claude Desktop, IDE, dll) kemampuan langsung untuk query data wil
 
 ---
 
+## 🌐 Kompatibilitas — Tidak Hanya Claude!
+
+> **MCP adalah open standard.** `mcp-indonesia` bekerja di semua aplikasi yang support MCP client — bukan cuma Claude.
+
+| Client | Platform | Status |
+|--------|----------|:------:|
+| **Claude Desktop** | Desktop app | ✅ |
+| **Claude.ai** | Web | ✅ |
+| **Cursor** | IDE | ✅ |
+| **VS Code** (GitHub Copilot) | IDE | ✅ |
+| **Windsurf** | IDE | ✅ |
+| **Zed Editor** | IDE | ✅ |
+| **Continue.dev** | VS Code / JetBrains ext | ✅ |
+| **Cline** | VS Code ext | ✅ |
+| **Goose** (Block) | Desktop app | ✅ |
+| **Amazon Q Developer** | IDE / CLI | ✅ |
+| **Gemini CLI** | Terminal | ✅ |
+| **App custom** | Node / Python / Go / dll | ✅ via SDK |
+
+---
+
 ## ✨ Kenapa `mcp-indonesia`?
 
 | | |
 |---|---|
-| 🔌 **Plug & play** | Satu baris config di Claude Desktop, langsung jalan |
+| 🔌 **Universal** | Jalan di semua MCP client, bukan cuma Claude |
 | 📦 **Offline-first** | Data wilayah & validator bekerja tanpa internet |
 | ⚡ **TTL Cache** | Hit API publik (BMKG, kurs) seminimal mungkin |
 | 🧩 **Modular** | Tambah data source baru = buat 1 modul + 1 baris registrasi |
@@ -76,9 +97,13 @@ npm install
 npm run build
 ```
 
-### ⚙️ Konfigurasi Claude Desktop
+---
 
-Tambahkan ke `claude_desktop_config.json`:
+## ⚙️ Konfigurasi per Client
+
+### Claude Desktop
+
+Edit `claude_desktop_config.json`:
 
 ```json
 {
@@ -91,12 +116,155 @@ Tambahkan ke `claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop, lalu coba:
+> 📁 Lokasi config: `~/Library/Application Support/Claude/` (macOS) · `%APPDATA%\Claude\` (Windows)
 
-> 💬 _"Cari kode wilayah Cibadak"_  
-> 💬 _"Validasi NIK 3273011708950001"_  
-> 💬 _"Gempa terkini di Indonesia"_  
-> 💬 _"Kurs USD ke IDR sekarang?"_
+Restart Claude Desktop, lalu coba:
+> 💬 _"Cari kode wilayah Cibadak"_ · _"Validasi NIK 3273011708950001"_ · _"Gempa terkini di Indonesia"_
+
+---
+
+### Cursor IDE
+
+Edit `~/.cursor/mcp.json` (global) atau `.cursor/mcp.json` (per project):
+
+```json
+{
+  "mcpServers": {
+    "indonesia": {
+      "command": "node",
+      "args": ["/path/ke/mcp-indonesia/dist/index.js"]
+    }
+  }
+}
+```
+
+---
+
+### VS Code (GitHub Copilot)
+
+Edit `.vscode/mcp.json` di root project:
+
+```json
+{
+  "servers": {
+    "indonesia": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/ke/mcp-indonesia/dist/index.js"]
+    }
+  }
+}
+```
+
+---
+
+### Windsurf
+
+Edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "indonesia": {
+      "command": "node",
+      "args": ["/path/ke/mcp-indonesia/dist/index.js"]
+    }
+  }
+}
+```
+
+---
+
+### Cline (VS Code Extension)
+
+Buka **Cline Settings → MCP Servers → Edit Config**, tambahkan:
+
+```json
+{
+  "mcpServers": {
+    "indonesia": {
+      "command": "node",
+      "args": ["/path/ke/mcp-indonesia/dist/index.js"]
+    }
+  }
+}
+```
+
+---
+
+## 🖥️ Penggunaan Mandiri (Tanpa AI Client)
+
+Tidak punya Claude Desktop atau IDE dengan MCP? Bisa dipakai langsung dengan 3 cara:
+
+### 1. 🔍 MCP Inspector (GUI interaktif — paling mudah)
+
+```bash
+npx @modelcontextprotocol/inspector node dist/index.js
+```
+
+Buka browser → `http://localhost:5173`. Kamu bisa browse semua tools dan memanggil langsung lewat UI.
+
+---
+
+### 2. 📡 Raw JSON-RPC via stdin (scripting / debugging)
+
+Server berkomunikasi lewat stdin/stdout pakai protokol JSON-RPC 2.0.
+
+```bash
+# Jalankan server
+node dist/index.js
+```
+
+Kirim request ke stdin (satu baris per pesan):
+
+```jsonc
+// List semua tools
+{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
+
+// Panggil tool wilayah_search
+{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"wilayah_search","arguments":{"query":"bandung","limit":3}}}
+
+// Validasi NIK
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate_nik","arguments":{"nik":"3273011708950001","referenceYear":2024}}}
+
+// Gempa terkini
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"bmkg_latest_earthquake","arguments":{}}}
+```
+
+---
+
+### 3. 💻 Integrasi Programatik (Node.js / TypeScript)
+
+Pakai `createServer()` langsung sebagai library di aplikasimu:
+
+```typescript
+import { createServer } from "./src/index.js";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+
+// Buat server dan client dalam satu proses
+const server = createServer();
+const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+const client = new Client({ name: "my-app", version: "1.0.0" });
+
+await Promise.all([
+  client.connect(clientTransport),
+  server.connect(serverTransport),
+]);
+
+// List semua tools
+const { tools } = await client.listTools();
+console.log(tools.map(t => t.name));
+
+// Panggil tool
+const result = await client.callTool({
+  name: "wilayah_search",
+  arguments: { query: "surabaya", limit: 5 },
+});
+console.log(result.content[0].text);
+
+await client.close();
+```
 
 ---
 
